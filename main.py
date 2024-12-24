@@ -23,22 +23,54 @@ def main_menu():
 
 def view_historical_data():
     print("\nFetching and displaying historical data...")
+    # Ask user for the time frame
+    print("Select the time frame to view historical data:")
+    print("1. Last Week")
+    print("2. Last Month")
+    print("3. Last Year")
+    time_choice = input("Enter your choice (1-3): ")
+
+    # Fetch data
     df = get_historical_data()
     df.to_csv('bitcoin_historical_data.csv', index=False)
     df = load_and_clean_data('bitcoin_historical_data.csv')
 
+    # Determine the time frame
+    if time_choice == '1':
+        days = 7
+    elif time_choice == '2':
+        days = 30
+    elif time_choice == '3':
+        days = 365
+    else:
+        print("Invalid choice. Defaulting to Last Week.")
+        days = 7
+
+    # Filter data for the selected time frame
+    end_date = df['time'].max()
+    start_date = end_date - pd.Timedelta(days=days)
+    df_filtered = df[df['time'] >= start_date]
+
     # Plot historical data
     plt.figure(figsize=(12,6))
-    plt.plot(df['time'], df['close'])
-    plt.title('Bitcoin Historical Close Prices')
+    plt.plot(df_filtered['time'], df_filtered['close'])
+    plt.title(f'Bitcoin Historical Close Prices - Last {days} Days')
     plt.xlabel('Date')
     plt.ylabel('Price (USD)')
     plt.grid(True)
     plt.show()
     input("Press Enter to return to the main menu...")
 
+
 def compare_historical_predicted_data():
     print("\nComparing historical data with predicted data...")
+    # Ask user for the time frame
+    print("Select the time frame to compare data:")
+    print("1. Last Week")
+    print("2. Last Month")
+    print("3. Last Year")
+    time_choice = input("Enter your choice (1-3): ")
+
     # Prepare data
     df = load_and_clean_data('bitcoin_historical_data.csv')
     df = add_technical_indicators(df)
@@ -55,8 +87,42 @@ def compare_historical_predicted_data():
     model = build_model((X_train.shape[1], X_train.shape[2]))
     history = train_model(model, X_train, y_train, X_test, y_test)
     # Evaluate model
-    evaluate_model(model, X_test, y_test, scaler_y)
+    y_pred_scaled = model.predict(X_test)
+    y_pred = scaler_y.inverse_transform(y_pred_scaled)
+    y_actual = scaler_y.inverse_transform(y_test)
+
+    # Convert y_pred and y_actual to DataFrame for easier handling
+    dates = df['time'][-len(y_pred):].reset_index(drop=True)
+    result_df = pd.DataFrame({'Date': dates, 'Actual': y_actual.flatten(), 'Predicted': y_pred.flatten()})
+
+    # Determine the time frame
+    if time_choice == '1':
+        days = 7
+    elif time_choice == '2':
+        days = 30
+    elif time_choice == '3':
+        days = 365
+    else:
+        print("Invalid choice. Defaulting to Last Week.")
+        days = 7
+
+    # Filter data for the selected time frame
+    end_date = result_df['Date'].max()
+    start_date = end_date - pd.Timedelta(days=days)
+    result_df_filtered = result_df[result_df['Date'] >= start_date]
+
+    # Plot actual vs. predicted prices
+    plt.figure(figsize=(12,6))
+    plt.plot(result_df_filtered['Date'], result_df_filtered['Actual'], label='Actual Price')
+    plt.plot(result_df_filtered['Date'], result_df_filtered['Predicted'], label='Predicted Price')
+    plt.title(f'Actual vs. Predicted Prices - Last {days} Days')
+    plt.xlabel('Date')
+    plt.ylabel('Price (USD)')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
     input("Press Enter to return to the main menu...")
+
 
 def predict_future_prices():
     print("\nPredicting future prices...")
