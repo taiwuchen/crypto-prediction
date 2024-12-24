@@ -1,28 +1,30 @@
+import joblib
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from model_training import prepare_data
-from sklearn.preprocessing import MinMaxScaler
 
-def predict_future_price(model, scaler, recent_data):
+def predict_future_price(model, scaler_x, scaler_y, recent_data):
     # Prepare the data
     X = recent_data.values
-    X_scaled = scaler.transform(X)
+    X_scaled = scaler_x.transform(X)
     X_scaled = np.reshape(X_scaled, (X_scaled.shape[0], 1, X_scaled.shape[1]))
 
     # Predict
-    predictions = model.predict(X_scaled)
-    return predictions
+    y_pred_scaled = model.predict(X_scaled)
+    y_pred = scaler_y.inverse_transform(y_pred_scaled)
+
+    return y_pred
 
 if __name__ == "__main__":
-    # Load the model using tf.keras
+    # Load the model
     model = tf.keras.models.load_model('trained_model.h5')
 
-    # Load and prepare data
-    df = pd.read_csv('data/processed_data.csv')
+    # Load the scalers
+    scaler_x = joblib.load('scaler_x.save')
+    scaler_y = joblib.load('scaler_y.save')
 
-    # Reuse the scaler from training
-    _, _, scaler = prepare_data(df)
+    # Load the data
+    df = pd.read_csv('data/processed_data.csv')
 
     # Define the features used in training
     features = ['open', 'high', 'low', 'close', 'volumefrom', 'volumeto',
@@ -32,5 +34,5 @@ if __name__ == "__main__":
     recent_data = df[features].tail(1)
 
     # Make prediction
-    predicted_price = predict_future_price(model, scaler, recent_data)
+    predicted_price = predict_future_price(model, scaler_x, scaler_y, recent_data)
     print(f"Predicted Next Day Price: {predicted_price[0][0]}")

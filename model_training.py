@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
-
+import joblib
 
 def prepare_data(df):
     # Select features and target variable
@@ -12,22 +12,26 @@ def prepare_data(df):
 
     # Shift target variable to predict the next day's price
     df['target'] = df[target].shift(-1)
-    df = df.dropna()
+    df = df.dropna().reset_index(drop=True)  # Reset index after dropping NaNs
 
     X = df[features].values
-    y = df['target'].values
+    y = df['target'].values.reshape(-1, 1)  # Reshape y to be a 2D array
 
     # Feature Scaling
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    X_scaled = scaler.fit_transform(X)
+    scaler_x = MinMaxScaler(feature_range=(0, 1))
+    X_scaled = scaler_x.fit_transform(X)
 
-    return X_scaled, y, scaler
+    # Scale y as well
+    scaler_y = MinMaxScaler(feature_range=(0, 1))
+    y_scaled = scaler_y.fit_transform(y)
 
-def split_data(X, y):
+    return X_scaled, y_scaled, scaler_x, scaler_y
+
+def split_data(X_scaled, y_scaled):
     # Split data into training and testing sets without shuffling
-    train_size = int(len(X) * 0.8)
-    X_train, X_test = X[:train_size], X[train_size:]
-    y_train, y_test = y[:train_size], y[train_size:]
+    train_size = int(len(X_scaled) * 0.8)
+    X_train, X_test = X_scaled[:train_size], X_scaled[train_size:]
+    y_train, y_test = y_scaled[:train_size], y_scaled[train_size:]
     return X_train, X_test, y_train, y_test
 
 def build_model(input_shape):
@@ -51,6 +55,18 @@ def train_model(model, X_train, y_train, X_test, y_test):
     # Save the trained model
     model.save('trained_model.h5')
     print("Model trained and saved.")
+
+    # Plot the loss
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(12,6))
+    plt.plot(history.history['loss'], label='Training Loss')
+    plt.plot(history.history['val_loss'], label='Validation Loss')
+    plt.title('Model Loss over Epochs')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.show()
+
     return history
 
 if __name__ == "__main__":
@@ -58,10 +74,14 @@ if __name__ == "__main__":
     df = pd.read_csv('data/processed_data.csv')
 
     # Prepare the data
-    X_scaled, y, scaler = prepare_data(df)
+    X_scaled, y_scaled, scaler_x, scaler_y = prepare_data(df)
+
+    # Save the scalers
+    joblib.dump(scaler_x, 'scaler_x.save')
+    joblib.dump(scaler_y, 'scaler_y.save')
 
     # Split the data
-    X_train, X_test, y_train, y_test = split_data(X_scaled, y)
+    X_train, X_test, y_train, y_test = split_data(X_scaled, y_scaled)
 
     # Reshape data for LSTM input
     X_train = np.reshape(X_train, (X_train.shape[0], 1, X_train.shape[1]))
@@ -69,6 +89,7 @@ if __name__ == "__main__":
 
     # Build the model
     model = build_model((X_train.shape[1], X_train.shape[2]))
+    model.summary()  # Print model summary
 
     # Train the model
     history = train_model(model, X_train, y_train, X_test, y_test)
