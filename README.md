@@ -1,6 +1,6 @@
 # Crypto Price Prediction Application
 
-Welcome to the Crypto Price Prediction Application! This project utilizes machine learning techniques(e.g.TensorFlow and scikit-learn) to predict future cryptocurrency prices based on historical data and technical indicators.
+Welcome to the Crypto Price Prediction Application! This project utilizes machine learning techniques (e.g. TensorFlow and scikit-learn) to predict future cryptocurrency prices based on historical data and technical indicators.
 
 # Getting Started
 
