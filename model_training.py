@@ -4,7 +4,7 @@ from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
 import joblib
 
-def prepare_data(df):
+def prepare_data(df, symbol):
     # Select features and target variable
     features = ['open', 'high', 'low', 'close', 'volumefrom', 'volumeto',
                 'MA7', 'MA21', 'EMA', 'RSI', 'day_of_week', 'month']
@@ -20,7 +20,8 @@ def prepare_data(df):
     X_scaled = scaler_x.fit_transform(X)
     scaler_y = MinMaxScaler(feature_range=(0, 1))
     y_scaled = scaler_y.fit_transform(y)
-
+    joblib.dump(scaler_x, f'models/scaler_x_{symbol}.save')
+    joblib.dump(scaler_y, f'models/scaler_y_{symbol}.save')
     return X_scaled, y_scaled, scaler_x, scaler_y
 
 def split_data(X_scaled, y_scaled):
@@ -39,7 +40,7 @@ def build_model(input_shape):
     model.compile(loss='mean_squared_error', optimizer='adam')
     return model
 
-def train_model(model, X_train, y_train, X_test, y_test):
+def train_model(model, X_train, y_train, X_test, y_test, symbol):
     history = model.fit(
         X_train, y_train,
         epochs=50,
@@ -47,7 +48,7 @@ def train_model(model, X_train, y_train, X_test, y_test):
         validation_data=(X_test, y_test),
         verbose=1
     )
-    model.save('trained_model.h5')
+    model.save(f'models/trained_model_{symbol}.h5')
     print("Model trained and saved.")
 
     # Plot the loss
@@ -64,15 +65,14 @@ def train_model(model, X_train, y_train, X_test, y_test):
     return history
 
 if __name__ == "__main__":
-    df = pd.read_csv('data/processed_data.csv')
+    symbol = 'BTC'  # Replace with desired symbol or pass as argument
+    df = pd.read_csv(f'data/processed_data_{symbol}.csv')
 
-    X_scaled, y_scaled, scaler_x, scaler_y = prepare_data(df)
-    joblib.dump(scaler_x, 'scaler_x.save')
-    joblib.dump(scaler_y, 'scaler_y.save')
+    X_scaled, y_scaled, scaler_x, scaler_y = prepare_data(df, symbol)
     X_train, X_test, y_train, y_test = split_data(X_scaled, y_scaled)
     X_train = np.reshape(X_train, (X_train.shape[0], 1, X_train.shape[1]))
     X_test = np.reshape(X_test, (X_test.shape[0], 1, X_test.shape[1]))
 
     model = build_model((X_train.shape[1], X_train.shape[2]))
     model.summary()  # Print model summary
-    history = train_model(model, X_train, y_train, X_test, y_test)
+    history = train_model(model, X_train, y_train, X_test, y_test, symbol)

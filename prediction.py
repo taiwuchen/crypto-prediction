@@ -15,11 +15,12 @@ def predict_future_price(model, scaler_x, scaler_y, recent_data):
     return y_pred
 
 if __name__ == "__main__":
-    model = tf.keras.models.load_model('trained_model.h5')
-    scaler_x = joblib.load('scaler_x.save')
-    scaler_y = joblib.load('scaler_y.save')
+    symbol = 'BTC'
+    model = tf.keras.models.load_model(f'trained_model_{symbol}.h5')
+    scaler_x = joblib.load(f'models/scaler_x_{symbol}.save')
+    scaler_y = joblib.load(f'models/scaler_y_{symbol}.save')
 
-    df = pd.read_csv('data/processed_data.csv')
+    df = pd.read_csv(f'data/processed_data_{symbol}.csv')
 
     features = ['open', 'high', 'low', 'close', 'volumefrom', 'volumeto',
                 'MA7', 'MA21', 'EMA', 'RSI', 'day_of_week', 'month']

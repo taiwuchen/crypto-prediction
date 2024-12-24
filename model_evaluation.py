@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 import tensorflow as tf
 
-def evaluate_model(model, X_test, y_test, scaler_y):
+def evaluate_model(model, X_test, y_test, scaler_y, symbol, crypto_name):
     y_pred_scaled = model.predict(X_test)
 
     # Inverse transform predictions and actual values
@@ -27,17 +27,20 @@ def evaluate_model(model, X_test, y_test, scaler_y):
     plt.figure(figsize=(12,6))
     plt.plot(y_actual, label='Actual Price')
     plt.plot(y_pred, label='Predicted Price')
-    plt.title('Actual vs. Predicted Prices')
+    plt.title(f'{crypto_name} Actual vs. Predicted Prices')
     plt.xlabel('Time')
     plt.ylabel('Price')
     plt.legend()
     plt.show()
 
 if __name__ == "__main__":
-    model = tf.keras.models.load_model('trained_model.h5')
-    df = pd.read_csv('data/processed_data.csv')
-    scaler_x = joblib.load('scaler_x.save')
-    scaler_y = joblib.load('scaler_y.save')
+    symbol = 'BTC'  # Replace with desired symbol or pass as argument
+    crypto_name = 'Bitcoin'  # Corresponding cryptocurrency name
+
+    model = tf.keras.models.load_model(f'trained_model_{symbol}.h5')
+    df = pd.read_csv(f'data/processed_data_{symbol}.csv')
+    scaler_x = joblib.load(f'models/scaler_x_{symbol}.save')
+    scaler_y = joblib.load(f'models/scaler_y_{symbol}.save')
     features = ['open', 'high', 'low', 'close', 'volumefrom', 'volumeto',
                 'MA7', 'MA21', 'EMA', 'RSI', 'day_of_week', 'month']
     target = 'close'
@@ -57,4 +60,4 @@ if __name__ == "__main__":
 
     X_test = np.reshape(X_test, (X_test.shape[0], 1, X_test.shape[1]))
 
-    evaluate_model(model, X_test, y_test, scaler_y)
+    evaluate_model(model, X_test, y_test, scaler_y, symbol, crypto_name)

@@ -17,6 +17,7 @@ def get_historical_data(symbol='BTC', comparison_symbol='USD', limit=2000, aggre
     return df
 
 if __name__ == "__main__":
-    df = get_historical_data()
-    df.to_csv('bitcoin_historical_data.csv', index=False)
+    symbol = 'BTC'
+    df = get_historical_data(symbol)
+    df.to_csv(f'{symbol}_historical_data.csv', index=False)
 
