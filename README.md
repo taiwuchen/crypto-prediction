@@ -25,7 +25,7 @@ To get started with the Crypto Price Prediction Application, follow these steps:
 
 # Update Log
 
-## Version 1.1 - December 30, 2023
+## Version 1.1
 
 - **Added Basic User Interface**: Implemented a command-line interface for easy interaction with the application.
 - **Real-Time Cryptocurrency Data Support**: The application now fetches and uses the most recent cryptocurrency data for predictions.
