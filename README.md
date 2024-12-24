@@ -29,6 +29,9 @@ To get started with the Crypto Price Prediction Application, follow these steps:
 
 # Update Log
 
+## Version 1.2
+- when the user chooses to view the historical data or compare historical and predicted data, they can select a time frame: one week, one month, or one year
+  
 ## Version 1.1
 
 - **Added Basic User Interface**: Implemented a command-line interface for easy interaction with the application.
