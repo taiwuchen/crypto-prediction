@@ -1,3 +1,7 @@
+# Crypto Price Prediction Application
+
+Welcome to the Crypto Price Prediction Application! This project utilizes machine learning techniques(e.g.TensorFlow and scikit-learn) to predict future cryptocurrency prices based on historical data and technical indicators.
+
 # Getting Started
 
 To get started with the Crypto Price Prediction Application, follow these steps:
@@ -12,7 +16,7 @@ To get started with the Crypto Price Prediction Application, follow these steps:
    pip install -r requirements.txt
    ```
 
-   This will install all the necessary dependencies for the application to run properly, including machine learning packages such as TensorFlow and scikit-learn [[2]].
+   This will install all the necessary dependencies for the application to run properly.
 
 3. **Run the Application**  
    Navigate to the project directory and run the `main.py` script to start the application:
@@ -25,9 +29,7 @@ To get started with the Crypto Price Prediction Application, follow these steps:
 
 # Update Log
 
-## Version 1.1
+## Version 1.1 - December 30, 2023
 
 - **Added Basic User Interface**: Implemented a command-line interface for easy interaction with the application.
 - **Real-Time Cryptocurrency Data Support**: The application now fetches and uses the most recent cryptocurrency data for predictions.
-
-
