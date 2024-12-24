@@ -107,19 +107,15 @@ def predict_future_prices():
 
         # Update recent_data with predicted values
         new_row = recent_data.iloc[-1].copy()
-        # Shift open, high, low, close
         new_row['open'] = new_row['close']
         new_row['high'] = new_row['close']
         new_row['low'] = new_row['close']
         new_row['close'] = y_pred.flatten()[0]
-        # Volumes remain the same
         new_row['volumefrom'] = new_row['volumefrom']
         new_row['volumeto'] = new_row['volumeto']
-        # Time features
         new_row['time'] = last_date
         new_row['day_of_week'] = last_date.dayofweek
         new_row['month'] = last_date.month
-        # Technical indicators remain the same
         new_row['MA7'] = new_row['MA7']
         new_row['MA21'] = new_row['MA21']
         new_row['EMA'] = new_row['EMA']
