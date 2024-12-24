@@ -103,7 +103,7 @@ def predict_future_prices(symbol, crypto_name):
         days_ahead = 1
 
     # Load the model and scalers
-    model = tf.keras.models.load_model(f'trained_model_{symbol}.h5')
+    model = tf.keras.models.load_model(f'models/trained_model_{symbol}.h5')
     scaler_x = joblib.load(f'models/scaler_x_{symbol}.save')
     scaler_y = joblib.load(f'models/scaler_y_{symbol}.save')
 
