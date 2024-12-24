@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 
-def get_historical_data(symbol, comparison_symbol, limit, aggregate, exchange):
+def get_historical_data(symbol='BTC', comparison_symbol='USD', limit=2000, aggregate=1, exchange='Coinbase'):
     url = 'https://min-api.cryptocompare.com/data/v2/histoday'
     params = {
         'fsym': symbol,
@@ -16,6 +16,7 @@ def get_historical_data(symbol, comparison_symbol, limit, aggregate, exchange):
     df['time'] = pd.to_datetime(df['time'], unit='s')
     return df
 
-# Example usage:
-df = get_historical_data('BTC', 'USD', 2000, 1, 'Coinbase')
-df.to_csv('bitcoin_historical_data.csv', index=False)
+if __name__ == "__main__":
+    df = get_historical_data()
+    df.to_csv('bitcoin_historical_data.csv', index=False)
+
