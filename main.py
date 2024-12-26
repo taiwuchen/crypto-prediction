@@ -74,13 +74,12 @@ def compare_historical_predicted_data(symbol, crypto_name):
     joblib.dump(scaler_x, f'models/scaler_x_{symbol}.save')
     joblib.dump(scaler_y, f'models/scaler_y_{symbol}.save')
     X_train, X_test, y_train, y_test = split_data(X_scaled, y_scaled)
-    # Reshape data
     X_train = X_train.reshape(X_train.shape[0], 1, X_train.shape[1])
     X_test = X_test.reshape(X_test.shape[0], 1, X_test.shape[1])
-    # Build and train model
+    
     model = build_model((X_train.shape[1], X_train.shape[2]))
     history = train_model(model, X_train, y_train, X_test, y_test, symbol)
-    # Evaluate model
+    
     evaluate_model(model, X_test, y_test, scaler_y, symbol, crypto_name)
     input("Press Enter to return to the main menu...")
 
@@ -102,18 +101,15 @@ def predict_future_prices(symbol, crypto_name):
         print("Invalid choice. Defaulting to Next Day prediction.")
         days_ahead = 1
 
-    # Load the model and scalers
     model = tf.keras.models.load_model(f'models/trained_model_{symbol}.h5')
     scaler_x = joblib.load(f'models/scaler_x_{symbol}.save')
     scaler_y = joblib.load(f'models/scaler_y_{symbol}.save')
 
-    # Load the data
     processed_data_file = f'data/processed_data_{symbol}.csv'
     df = pd.read_csv(processed_data_file)
     features = ['open', 'high', 'low', 'close', 'volumefrom', 'volumeto',
                 'MA7', 'MA21', 'EMA', 'RSI', 'day_of_week', 'month']
 
-    # Get the most recent data point
     recent_data = df.tail(1).copy()
     predictions = []
     dates = []
@@ -123,12 +119,10 @@ def predict_future_prices(symbol, crypto_name):
         X_scaled = scaler_x.transform(X)
         X_scaled = X_scaled.reshape(X_scaled.shape[0], 1, X_scaled.shape[1])
 
-        # Predict
         y_pred_scaled = model.predict(X_scaled)
         y_pred = scaler_y.inverse_transform(y_pred_scaled)
         predictions.append(y_pred.flatten()[0])
 
-        # Prepare for next prediction
         last_date = pd.to_datetime(recent_data['time'].values[0]) + pd.Timedelta(days=1)
         dates.append(last_date)
 
@@ -150,7 +144,7 @@ def predict_future_prices(symbol, crypto_name):
 
         recent_data = pd.DataFrame([new_row])
 
-    # Plot future predictions
+    # Plot predicted prices
     plt.figure(figsize=(12,6))
     plt.plot(dates, predictions, marker='o', linestyle='-')
     plt.title(f'{crypto_name} Predicted Prices for the Next {days_ahead} Day(s)')
@@ -159,7 +153,6 @@ def predict_future_prices(symbol, crypto_name):
     plt.grid(True)
 
     if days_ahead > 1:
-        # Zoom in to see the changes more clearly
         plt.xlim(dates[0], dates[-1])
         ymin = min(predictions) * 0.995
         ymax = max(predictions) * 1.005
