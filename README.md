@@ -29,10 +29,13 @@ To get started with the Crypto Price Prediction Application, follow these steps:
 
 # Update Log
 
+## Version 1.3
+- **Added New Crypto**: Ethereum (ETH) and Dogecoin (DOGE)
+
 ## Version 1.2
-- when the user chooses to view the historical data or compare historical and predicted data, they can select a time frame: one week, one month, or one year
+- When the user chooses to view the historical data or compare historical and predicted data, they can select a time frame: one week, one month, one year, or all time.
   
 ## Version 1.1
 
 - **Added Basic User Interface**: Implemented a command-line interface for easy interaction with the application.
-- **Real-Time Cryptocurrency Data Support**: The application now fetches and uses the most recent cryptocurrency data for predictions.
+- **Real-Time Data Support**: The application now fetches and uses the most recent cryptocurrency data for predictions.
