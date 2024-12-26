@@ -51,19 +51,67 @@ def view_historical_data(symbol, crypto_name):
     df.to_csv(data_file, index=False)
     df = load_and_clean_data(data_file)
 
-    # Plot historical data
+    print("\nSelect the time frame to view historical data:")
+    print("1. Last Week")
+    print("2. Last Month")
+    print("3. Last Year")
+    print("4. All Time")
+    time_choice = input("Enter your choice (1-4): ")
+
+    if time_choice == '1':
+        days = 7
+    elif time_choice == '2':
+        days = 30
+    elif time_choice == '3':
+        days = 365
+    elif time_choice == '4':
+        days = None  # Represents All Time
+    else:
+        print("Invalid choice. Defaulting to Last Week.")
+        days = 7
+
+    if days is not None:
+        end_date = df['time'].max()
+        start_date = end_date - pd.Timedelta(days=days)
+        df_filtered = df[df['time'] >= start_date]
+        title_time_frame = f"Last {days} Days"
+    else:
+        df_filtered = df
+        title_time_frame = "All Time"
+
     plt.figure(figsize=(12,6))
-    plt.plot(df['time'], df['close'])
-    plt.title(f'{crypto_name} Historical Close Prices')
+    plt.plot(df_filtered['time'], df_filtered['close'])
+    plt.title(f'{crypto_name} Historical Close Prices - {title_time_frame}')
     plt.xlabel('Date')
     plt.ylabel('Price (USD)')
     plt.grid(True)
     plt.show()
     input("Press Enter to return to the main menu...")
 
+
+
 def compare_historical_predicted_data(symbol, crypto_name):
     print(f"\nComparing historical data with predicted data for {crypto_name}...")
-    # Prepare data
+    print("\nSelect the time frame to compare data:")
+    print("1. Last Week")
+    print("2. Last Month")
+    print("3. Last Year")
+    print("4. All Time")
+    time_choice = input("Enter your choice (1-4): ")
+
+    if time_choice == '1':
+        days = 7
+    elif time_choice == '2':
+        days = 30
+    elif time_choice == '3':
+        days = 365
+    elif time_choice == '4':
+        days = None
+    else:
+        print("Invalid choice. Defaulting to Last Week.")
+        days = 7
+
+
     data_file = f'data/{symbol}_historical_data.csv'
     df = load_and_clean_data(data_file)
     df = add_technical_indicators(df)
@@ -76,12 +124,43 @@ def compare_historical_predicted_data(symbol, crypto_name):
     X_train, X_test, y_train, y_test = split_data(X_scaled, y_scaled)
     X_train = X_train.reshape(X_train.shape[0], 1, X_train.shape[1])
     X_test = X_test.reshape(X_test.shape[0], 1, X_test.shape[1])
-    
+
     model = build_model((X_train.shape[1], X_train.shape[2]))
     history = train_model(model, X_train, y_train, X_test, y_test, symbol)
-    
-    evaluate_model(model, X_test, y_test, scaler_y, symbol, crypto_name)
+
+    y_pred_scaled = model.predict(X_test)
+    y_pred = scaler_y.inverse_transform(y_pred_scaled)
+    y_actual = scaler_y.inverse_transform(y_test)
+
+    dates = df['time'][-len(y_pred):].reset_index(drop=True)
+    result_df = pd.DataFrame({
+        'Date': dates,
+        'Actual': y_actual.flatten(),
+        'Predicted': y_pred.flatten()
+    })
+
+
+    if days is not None:
+        end_date = result_df['Date'].max()
+        start_date = end_date - pd.Timedelta(days=days)
+        result_df_filtered = result_df[result_df['Date'] >= start_date]
+        title_time_frame = f"Last {days} Days"
+    else:
+        result_df_filtered = result_df
+        title_time_frame = "All Time"
+
+    plt.figure(figsize=(12,6))
+    plt.plot(result_df_filtered['Date'], result_df_filtered['Actual'], label='Actual Price')
+    plt.plot(result_df_filtered['Date'], result_df_filtered['Predicted'], label='Predicted Price')
+    plt.title(f'{crypto_name} Actual vs. Predicted Prices - {title_time_frame}')
+    plt.xlabel('Date')
+    plt.ylabel('Price (USD)')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
     input("Press Enter to return to the main menu...")
+
+
 
 def predict_future_prices(symbol, crypto_name):
     print(f"\nPredicting future prices for {crypto_name}...")
