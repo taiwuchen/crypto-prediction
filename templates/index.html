@@ -1,0 +1,13 @@
+<form action="/" method="post">
+    <label>Select Cryptocurrency:</label>
+    <select name="crypto">
+        {% for symbol, name in crypto_symbols.items() %}
+        <option value="{{ symbol }}" {% if symbol==selected_crypto %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Select</button>
+</form>
+
+<a href="/historical">View Historical Data</a>
+<a href="/compare">Compare Data</a>
+<a href="/predict">Predict Future Prices</a>
