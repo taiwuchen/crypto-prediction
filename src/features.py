@@ -31,7 +31,7 @@ def add_time_features(df):
     return df
 
 if __name__ == "__main__":
-    from data_preparation import load_and_clean_data
+    from src.data_preparation import load_and_clean_data
     data_file = 'bitcoin_historical_data.csv'
     df = load_and_clean_data(data_file)
     df = add_technical_indicators(df)

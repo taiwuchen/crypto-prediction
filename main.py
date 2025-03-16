@@ -2,12 +2,12 @@ import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from get_historical_data import get_historical_data
-from data_preparation import load_and_clean_data
-from feature_engineering import add_technical_indicators, add_time_features
-from model_training import prepare_data, split_data, build_model, train_model
-from model_evaluation import evaluate_model
-from prediction import predict_future_price
+from src.get_historical_data import get_historical_data
+from src.data_preparation import load_and_clean_data
+from src.features import add_technical_indicators, add_time_features
+from src.model_training import prepare_data, split_data, build_model, train_model
+from src.model_evaluation import evaluate_model
+from src.prediction import predict_future_price
 import joblib
 import tensorflow as tf
 import os
