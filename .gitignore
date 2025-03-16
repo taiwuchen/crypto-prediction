@@ -1,0 +1,18 @@
+# This file is used to ignore certain files and directories when pushing to a Git repository.
+
+# Ignore Python cache files
+__pycache__/
+
+# Ignore virtual environment folders
+venv/
+env/
+
+# Ignore log files
+*.log
+
+# Ignore data files
+data/
+
+# Ignore model files
+models/
+
