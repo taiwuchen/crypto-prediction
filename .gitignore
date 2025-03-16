@@ -10,11 +10,7 @@ env/
 # Ignore log files
 *.log
 
-# Ignore files in data folder but keep the directory
-data/*
-!data/.gitkeep
-
-# Ignore files in models folder but keep the directory
-models/*
-!models/.gitkeep
+# Ignore files in data and models folder
+data/
+models/
 

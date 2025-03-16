@@ -10,6 +10,15 @@ from model_evaluation import evaluate_model
 from prediction import predict_future_price
 import joblib
 import tensorflow as tf
+import os
+
+# Create necessary directories if they don't exist
+def create_directories():
+    directories = ['data', 'models']
+    for directory in directories:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+            print(f"Created directory: {directory}")
 
 def select_cryptocurrency():
     print("\nSelect a cryptocurrency:")
@@ -245,6 +254,7 @@ def predict_future_prices(symbol, crypto_name):
     input("Press Enter to return to the main menu...")
 
 if __name__ == "__main__":
+    create_directories()
     symbol, crypto_name = select_cryptocurrency()
     while True:
         choice = main_menu(symbol, crypto_name)
