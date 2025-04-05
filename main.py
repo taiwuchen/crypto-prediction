@@ -97,8 +97,6 @@ def view_historical_data(symbol, crypto_name):
     plt.show()
     input("Press Enter to return to the main menu...")
 
-
-
 def compare_historical_predicted_data(symbol, crypto_name):
     print(f"\nComparing historical data with predicted data for {crypto_name}...")
     print("\nSelect the time frame to compare data:")
@@ -119,7 +117,6 @@ def compare_historical_predicted_data(symbol, crypto_name):
     else:
         print("Invalid choice. Defaulting to Last Week.")
         days = 7
-
 
     data_file = f'data/{symbol}_historical_data.csv'
     df = load_and_clean_data(data_file)
@@ -147,7 +144,6 @@ def compare_historical_predicted_data(symbol, crypto_name):
         'Actual': y_actual.flatten(),
         'Predicted': y_pred.flatten()
     })
-
 
     if days is not None:
         end_date = result_df['Date'].max()
