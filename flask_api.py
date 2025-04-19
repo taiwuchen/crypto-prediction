@@ -7,7 +7,7 @@ import numpy as np # Added numpy
 import os
 from src.get_historical_data import get_historical_data
 from src.data_preparation import load_and_clean_data
-from src.model_training import prepare_data, split_data
+from src.model_training import prepare_data, split_data, build_model, train_model
 from src.features import add_technical_indicators, add_time_features
 import logging # Added logging
 
@@ -61,6 +61,61 @@ def filter_dataframe_by_timeframe(df, time_column, time_frame):
     return df_filtered
 
 # --- API Logic Functions ---
+
+def init_data_api(symbol):
+    """Initializes all necessary data files for a given cryptocurrency.
+    This function will:
+    1. Fetch and save historical data
+    2. Process the data (add technical indicators and time features)
+    3. Train the model and save it
+    4. Save the scalers for future use
+    """
+    try:
+        # Create necessary directories
+        if not os.path.exists('data'):
+            os.makedirs('data')
+        if not os.path.exists('models'):
+            os.makedirs('models')
+            
+        paths = get_data_paths(symbol)
+        
+        # Step 1: Fetch and save historical data
+        logging.info(f"Fetching historical data for {symbol}")
+        df = get_historical_data(symbol)
+        df.to_csv(paths['historical_data'], index=False)
+        
+        # Step 2: Process the data
+        logging.info(f"Processing data for {symbol}")
+        df = load_and_clean_data(paths['historical_data'])
+        df = add_technical_indicators(df)
+        df = add_time_features(df)
+        df.to_csv(paths['processed_data'], index=False)
+        
+        # Step 3: Prepare data for model training
+        logging.info(f"Preparing data for model training for {symbol}")
+        X_scaled, y_scaled, scaler_x, scaler_y = prepare_data(df, symbol)
+        joblib.dump(scaler_x, paths['scaler_x'])
+        joblib.dump(scaler_y, paths['scaler_y'])
+        
+        # Step 4: Split data and reshape for LSTM
+        X_train, X_test, y_train, y_test = split_data(X_scaled, y_scaled)
+        X_train = X_train.reshape(X_train.shape[0], 1, X_train.shape[1])
+        X_test = X_test.reshape(X_test.shape[0], 1, X_test.shape[1])
+        
+        # Step 5: Build and train model
+        logging.info(f"Building and training model for {symbol}")
+        model = build_model((X_train.shape[1], X_train.shape[2]))
+        history = train_model(model, X_train, y_train, X_test, y_test, symbol)
+        
+        return {
+            "success": True,
+            "message": f"Successfully initialized data for {symbol}",
+            "files_created": list(paths.values())
+        }, None
+        
+    except Exception as e:
+        logging.exception(f"Error during initialization for {symbol}: {e}")
+        return None, str(e)
 
 def predict_future_prices_api(symbol, days_ahead):
     paths = get_data_paths(symbol)
@@ -225,7 +280,8 @@ def get_comparison_data_api(symbol, time_frame):
 
 # --- Flask App Setup ---
 app = Flask(__name__)
-CORS(app) # Enable CORS for all routes
+# Configure CORS to allow all origins, methods, and headers
+CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS"], "allow_headers": ["Content-Type", "Accept"]}})
 
 @app.before_request
 def log_request_info():
@@ -254,6 +310,19 @@ def handle_exception(e):
 @app.route("/")
 def home():
     return "Crypto Prediction API is running! Use /predict, /historical, /compare endpoints."
+
+@app.route("/init", methods=["GET"])
+def init_data():
+    symbol = request.args.get("symbol", "BTC").upper()
+    app.logger.info(f"Received /init request for {symbol}")
+    
+    result, error_msg = init_data_api(symbol)
+    if error_msg:
+        app.logger.error(f"Error in /init for {symbol}: {error_msg}")
+        return jsonify({"error": error_msg}), 500
+    
+    app.logger.info(f"Successfully initialized data for {symbol}")
+    return jsonify(result)
 
 @app.route("/predict", methods=["GET"])
 def predict():

@@ -39,7 +39,12 @@ def build_model(input_shape):
     model.compile(loss='mean_squared_error', optimizer='adam')
     return model
 
-def train_model(model, X_train, y_train, X_test, y_test, symbol):
+def train_model(model, X_train, y_train, X_test, y_test, symbol, show_plot=False):
+    # Set matplotlib backend to non-interactive 'Agg' to prevent GUI issues
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    
     history = model.fit(
         X_train, y_train,
         epochs=50,
@@ -50,8 +55,6 @@ def train_model(model, X_train, y_train, X_test, y_test, symbol):
     model.save(f'models/trained_model_{symbol}.h5')
     print("Model trained and saved.")
 
-    # Plot the loss
-    import matplotlib.pyplot as plt
     plt.figure(figsize=(12,6))
     plt.plot(history.history['loss'], label='Training Loss')
     plt.plot(history.history['val_loss'], label='Validation Loss')
@@ -59,7 +62,13 @@ def train_model(model, X_train, y_train, X_test, y_test, symbol):
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.legend()
-    plt.show()
+    
+    # Save the plot to a file
+    plot_path = f'models/training_loss_{symbol}.png'
+    plt.savefig(plot_path)
+    plt.close()
+    if show_plot:
+        plt.show()
 
     return history
 
@@ -74,4 +83,5 @@ if __name__ == "__main__":
 
     model = build_model((X_train.shape[1], X_train.shape[2]))
     model.summary()  # Print model summary
-    history = train_model(model, X_train, y_train, X_test, y_test, symbol)
+
+    history = train_model(model, X_train, y_train, X_test, y_test, symbol, show_plot=True)

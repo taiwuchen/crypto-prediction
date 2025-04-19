@@ -51,6 +51,7 @@ To get started with the Crypto Price Prediction Application (Version 2.0+), foll
 - **Web-Based Architecture**: Migrated to a web application with a Flask API backend and a Next.js (React) frontend.
 - **Modern UI**: Added a user-friendly web interface for predictions and data visualization.
 - **API Endpoints**: Exposed endpoints for prediction, historical data, and comparison.
+- **Data Initialization**: Added functionality to initialize or update data and models on demand.
 
 ## Version 1.3
 - **Added New Crypto**: Ethereum (ETH) and Dogecoin (DOGE)
