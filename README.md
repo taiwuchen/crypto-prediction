@@ -4,7 +4,7 @@ Welcome to the Crypto Price Prediction Application! This project utilizes machin
 
 # Getting Started
 
-To get started with the Crypto Price Prediction Application, follow these steps:
+To get started with the Crypto Price Prediction Application (Version 2.0+), follow these steps:
 
 1. **Download the Project Files**  
    Download the zip file of this repository and unzip it to your desired location on your computer.
@@ -16,18 +16,41 @@ To get started with the Crypto Price Prediction Application, follow these steps:
    pip install -r requirements.txt
    ```
 
-   This will install all the necessary dependencies for the application to run properly.
+   This will install all the necessary dependencies for the backend (Flask API) to run properly.
 
-3. **Run the Application**  
-   Navigate to the project directory and run the `main.py` script to start the application:
+3. **Install Frontend Dependencies**  
+   Navigate to the `frontend` directory and install the required Node.js packages:
 
    ```bash
-   python main.py
+   cd frontend
+   npm install
    ```
 
-   Follow the on-screen instructions to interact with the application.
+4. **Run the Flask Backend**  
+   In the project root directory, start the Flask API server:
+
+   ```bash
+   python flask_api.py
+   ```
+   The backend will run at `http://localhost:5001` by default.
+
+5. **Run the Next.js Frontend**  
+   In a new terminal, from the `frontend` directory, start the frontend development server:
+
+   ```bash
+   npm run dev
+   ```
+   The frontend will run at `http://localhost:3000` by default.
+
+6. **Access the Application**  
+   Open your browser and go to `http://localhost:3000` to use the web interface. The frontend will communicate with the backend API for predictions and data.
 
 # Update Log
+
+## Version 2.0
+- **Web-Based Architecture**: Migrated to a web application with a Flask API backend and a Next.js (React) frontend.
+- **Modern UI**: Added a user-friendly web interface for predictions and data visualization.
+- **API Endpoints**: Exposed endpoints for prediction, historical data, and comparison.
 
 ## Version 1.3
 - **Added New Crypto**: Ethereum (ETH) and Dogecoin (DOGE)
