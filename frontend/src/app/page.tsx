@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid } from "recharts"; // Added Legend, CartesianGrid
 
 // --- Constants ---
-const API_BASE_URL = "http://127.0.0.1:5001"; // Flask API URL
+const API_BASE_URL = "http://localhost:5001"; // Updated URL to match Flask API exactly
 
 const CRYPTOS = [
   { symbol: "BTC", name: "Bitcoin" },
@@ -63,6 +63,76 @@ export default function Home() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // New state for initialization
+  const [initLoading, setInitLoading] = useState(false);
+  const [initSuccess, setInitSuccess] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
+
+  // --- Data Initialization Function ---
+  const initializeData = async () => {
+    setInitLoading(true);
+    setInitSuccess(false);
+    setInitError(null);
+    
+    try {
+      const url = `${API_BASE_URL}/init?symbol=${selectedCrypto}`;
+      console.log(`Initializing data from: ${url}`);
+      
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 120 second timeout
+      
+      try {
+        const res = await fetch(url, { 
+          signal: controller.signal,
+          // Explicitly set mode to cors to allow cross-origin requests
+          mode: 'cors',
+          // Add headers to help with CORS
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!res.ok) {
+          let errorData;
+          try {
+            errorData = await res.json();
+          } catch {
+            const text = await res.text();
+            errorData = { error: text || `API request failed with status: ${res.status}` };
+          }
+          console.error("API Error Response:", errorData);
+          throw new Error(errorData.error || `Initialization Error: ${res.status}`);
+        }
+        
+        const json = await res.json();
+        console.log("Initialization Success:", json);
+        
+        setInitSuccess(true);
+        // Reset chart data as it might be outdated now
+        setHistoricalData(null);
+        setComparisonData(null);
+        setPredictionData(null);
+      } catch (error) {
+        clearTimeout(timeoutId);
+        throw error;
+      }
+    } catch (e: any) {
+      console.error("Initialization Error:", e);
+      const errorMessage = e.name === 'AbortError' 
+        ? 'Request timed out. The server might be busy training the model, please try again.' 
+        : e.message || "Failed to initialize data";
+      
+      setInitError(errorMessage);
+      setInitSuccess(false);
+    } finally {
+      setInitLoading(false);
+    }
+  };
 
   // --- Data Fetching Functions ---
   const fetchData = async () => {
@@ -92,7 +162,16 @@ export default function Home() {
 
       const fullUrl = `${url}?${params.toString()}`;
       console.log(`Fetching data from: ${fullUrl}`); // Log the URL being fetched
-      const res = await fetch(fullUrl);
+      
+      const res = await fetch(fullUrl, {
+        // Explicitly set mode to cors to allow cross-origin requests
+        mode: 'cors',
+        // Add headers to help with CORS
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
 
       if (!res.ok) {
         let errorData;
@@ -257,6 +336,31 @@ export default function Home() {
                 ))}
               </select>
             )}
+          </div>
+        </div>
+
+        {/* Initialization Section */}
+        <div className="border-t border-gray-200 dark:border-gray-700 mt-4 pt-4 mb-4">
+          <div className="flex flex-col items-center space-y-2">
+            <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-2">
+              First time using the app or want to update data? Initialize the data for the selected cryptocurrency.
+              <br />
+              <span className="font-medium">This will fetch the latest data and train the prediction model (may take a minute).</span>
+            </p>
+            <button
+              className={`px-6 py-2 rounded font-semibold transition ${
+                initLoading
+                  ? "bg-gray-400 text-white cursor-not-allowed"
+                  : initSuccess
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : "bg-yellow-600 text-white hover:bg-yellow-700"
+              }`}
+              onClick={initializeData}
+              disabled={initLoading}
+            >
+              {initLoading ? "Initializing..." : initSuccess ? "Initialization Successful!" : "Initialize Data"}
+            </button>
+            {initError && <div className="text-red-500 text-sm">{initError}</div>}
           </div>
         </div>
 
