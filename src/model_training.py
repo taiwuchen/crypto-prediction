@@ -4,8 +4,7 @@ from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
 import joblib
 
-def prepare_data(df, symbol):
-    # Select features and target variable
+def prepare_data(df, symbol, scaler_x_path=None, scaler_y_path=None):
     features = ['open', 'high', 'low', 'close', 'volumefrom', 'volumeto',
                 'MA7', 'MA21', 'EMA', 'RSI', 'day_of_week', 'month']
     target = 'close'
@@ -68,7 +67,7 @@ if __name__ == "__main__":
     symbol = 'BTC'  # Replace with desired symbol or pass as argument
     df = pd.read_csv(f'data/processed_data_{symbol}.csv')
 
-    X_scaled, y_scaled, scaler_x, scaler_y = prepare_data(df, symbol)
+    X_scaled, y_scaled, scaler_x_loaded, scaler_y_loaded = prepare_data(df, symbol)
     X_train, X_test, y_train, y_test = split_data(X_scaled, y_scaled)
     X_train = np.reshape(X_train, (X_train.shape[0], 1, X_train.shape[1]))
     X_test = np.reshape(X_test, (X_test.shape[0], 1, X_test.shape[1]))

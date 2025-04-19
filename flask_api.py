@@ -174,7 +174,7 @@ def get_comparison_data_api(symbol, time_frame):
         # 2. Prepare data for model
         logging.info(f"Preparing data for model: {symbol}")
         # Ensure 'prepare_data' uses the correct features and handles potential missing columns
-        X_scaled, y_scaled, scaler_x_loaded, scaler_y_loaded = prepare_data(df, symbol, scaler_x_path=paths['scaler_x'], scaler_y_path=paths['scaler_y'])
+        X_scaled, y_scaled, scaler_x_loaded, scaler_y_loaded = prepare_data(df, symbol)
 
         # 3. Split data (we only need the test set for comparison)
         logging.info(f"Splitting data: {symbol}")
@@ -243,6 +243,11 @@ def after_request(response):
     # except Exception as e:
     #     app.logger.error(f"Error logging response data: {e}")
     return response
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    app.logger.error(f"Unhandled Exception: {e}")
+    return jsonify({"error": str(e)}), 500
 
 # --- API Routes ---
 

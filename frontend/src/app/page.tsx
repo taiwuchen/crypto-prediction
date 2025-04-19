@@ -95,7 +95,13 @@ export default function Home() {
       const res = await fetch(fullUrl);
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ error: "API request failed with status: " + res.status }));
+        let errorData;
+        try {
+          errorData = await res.json();
+        } catch {
+          const text = await res.text();
+          errorData = { error: text || `API request failed with status: ${res.status}` };
+        }
         console.error("API Error Response:", errorData);
         throw new Error(errorData.error || `API Error: ${res.status}`);
       }
