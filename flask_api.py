@@ -1,24 +1,20 @@
-from flask import Flask, request, jsonify, g # Added g
+from flask import Flask, request, jsonify, g
 from flask_cors import CORS
 import tensorflow as tf
 import joblib
 import pandas as pd
-import numpy as np # Added numpy
+import numpy as np
 import os
 from src.get_historical_data import get_historical_data
 from src.data_preparation import load_and_clean_data
 from src.model_training import prepare_data, split_data, build_model, train_model
 from src.features import add_technical_indicators, add_time_features
-import logging # Added logging
+import logging
 
-# Setup logging
 logging.basicConfig(level=logging.INFO)
 
-# --- Helper Functions ---
-
 def get_data_paths(symbol):
-    """Returns paths for data and model files."""
-    base_path = os.path.dirname(__file__) # Ensure paths are relative to flask_api.py
+    base_path = os.path.dirname(__file__)
     return {
         "model": os.path.join(base_path, f'models/trained_model_{symbol}.h5'),
         "scaler_x": os.path.join(base_path, f'models/scaler_x_{symbol}.save'),
@@ -28,7 +24,6 @@ def get_data_paths(symbol):
     }
 
 def check_files_exist(paths):
-    """Checks if all files in the paths dictionary exist."""
     for key, path in paths.items():
         if not os.path.exists(path):
             logging.error(f"File not found: {path} (for key: {key})")
@@ -36,7 +31,6 @@ def check_files_exist(paths):
     return True
 
 def filter_dataframe_by_timeframe(df, time_column, time_frame):
-    """Filters a DataFrame based on a specified time frame."""
     df[time_column] = pd.to_datetime(df[time_column]) # Ensure datetime format
     if time_frame == 'week':
         days = 7
