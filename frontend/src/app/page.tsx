@@ -113,7 +113,6 @@ export default function Home() {
         console.log("Initialization Success:", json);
         
         setInitSuccess(true);
-        // Reset chart data as it might be outdated now
         setHistoricalData(null);
         setComparisonData(null);
         setPredictionData(null);
